@@ -14,7 +14,7 @@ function findTracks(selector) {
 		var title = node.querySelectorAll(selector.title).item(0).textContent.trim();
 
 		addTomahawkTrackLink(node.appendChild(document.createElement("div")), artist, title);
-		//addRdioTrackLink(node.appendChild(document.createElement("div")), artist, title);
+		addRdioTrackLink(node.appendChild(document.createElement("div")), artist, title);
 		addSpotifyTrackLink(node.appendChild(document.createElement("div")), artist, title);
 	}
 }
@@ -67,6 +67,17 @@ function addSpotifyTrackLink(node, artist, title) {
 	xhr.send(null);
 }
 
+function addRdioTrackLink(node, artist, title) {
+	var link = document.createElement("a");
+	link.href = "http://alf.hubmed.org/2012/05/rdio-track-search/" + buildQueryString({ artist: artist, title: title });
+	link.innerHTML = "▶";
+	link.style.background = "url(http://ak.rdio.com/media/favicon_20111219.ico) no-repeat right center";
+	link.style.paddingRight = "20px";
+
+	link.addEventListener("click", openNewWindow, true);
+	node.appendChild(link);
+}
+
 /*
 function addRdioTrackLink(node, artist, title) {
 	var params = {
@@ -115,6 +126,7 @@ function buildQueryString(items) {
 
 	for (var key in items) {
 		if (!items.hasOwnProperty(key)) continue;
+
    		var obj = items[key];
 
    		if (Array.isArray(obj)) {
@@ -133,5 +145,5 @@ function buildQueryString(items) {
 function openNewWindow(event) {
 	event.preventDefault();
 	event.stopPropagation();
-	window.open(event.target.href, "Resolver", "menubar=no,toolbar=no,location=yes,height=400,width=400");
+	window.open(event.target.href, "Resolver", "menubar=no,toolbar=no,location=yes,height=500,width=800");
 }
