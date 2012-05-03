@@ -21,12 +21,28 @@ function findTracks(selector) {
 
 function addTomahawkTrackLink(node, artist, title) {
 	var link = document.createElement("a");
-	link.href = "tomahawk://open/track" + buildQueryString({ artist: artist, title: title });
+	//link.href = "tomahawk://open/track" + buildQueryString({ artist: artist, title: title });
+	link.href = "http://toma.hk/" + buildQueryString({ artist: artist, title: title });
 	link.innerHTML = "▶";
 	link.style.background = "url(http://www.tomahawk-player.org/sites/default/files/favicon.ico) no-repeat right center";
 	link.style.paddingRight = "20px";
+
+	link.addEventListener("click", openNewWindow, true);
 	node.appendChild(link);
 }
+
+/*
+function addTomahawkEmbed(node, artist, title) {
+	var object = document.createElement("object");
+	object.setAttribute("type", "text/html");
+	object.setAttribute("data", "http://toma.hk/embed.php" + buildQueryString({ artist: artist, title: title }));
+	object.style.width = "100%";
+	object.style.height = "200px";
+	object.style.margin = "10px 0";
+
+	node.appendChild(object);
+}
+*/
 
 function addSpotifyTrackLink(node, artist, title) {
 	var query = 'artist:"' + artist + '" track:"' + title + '"';
@@ -114,3 +130,8 @@ function buildQueryString(items) {
 	return parts.length ? "?" + parts.join("&").replace(/%20/g, "+") : "";
 }
 
+function openNewWindow(event) {
+	event.preventDefault();
+	event.stopPropagation();
+	window.open(event.target.href, "Resolver", "menubar=no,toolbar=no,location=yes,height=400,width=400");
+}
