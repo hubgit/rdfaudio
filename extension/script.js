@@ -1,6 +1,6 @@
 findTracks({
-	track: "[typeof='mo:Track']",
-	artist: "[rel='foaf:maker'] [property='foaf:name']",
+	track: "[typeof='mo:Track'],[typeof='po:MusicSegment']",
+	artist: "[rel='foaf:maker'] [property='foaf:name'],[rel='mo:performer'] [property='foaf:name']",
 	title: "[property='dc:title']",
 })
 
