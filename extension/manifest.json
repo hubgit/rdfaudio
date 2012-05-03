@@ -1,0 +1,12 @@
+{
+  "name": "RDFaudio",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "Add audio resolver/player links to HTML track lists marked up with RDFa",
+  "content_scripts": [
+    {
+      "matches" : ["http://www.bbc.co.uk/programmes/*"],
+      "js" : ["script.js"]
+    }
+  ]
+}
