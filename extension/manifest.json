@@ -5,7 +5,10 @@
   "description": "Add audio resolver/player links to HTML track lists marked up with RDFa",
   "content_scripts": [
     {
-      "matches" : ["http://www.bbc.co.uk/programmes/*"],
+      "matches" : [
+        "http://www.bbc.co.uk/programmes/*",
+        "http://radiotagbot.prototyping.bbc.co.uk/*"
+      ],
       "js" : ["script.js"]
     }
   ]
