@@ -13,9 +13,12 @@ function findTracks(selector) {
 		var artist = node.querySelectorAll(selector.artist).item(0).textContent.trim();
 		var title = node.querySelectorAll(selector.title).item(0).textContent.trim();
 
-		addTomahawkTrackLink(node.appendChild(document.createElement("div")), artist, title);
-		addRdioTrackLink(node.appendChild(document.createElement("div")), artist, title);
-		addSpotifyTrackLink(node.appendChild(document.createElement("div")), artist, title);
+		var spotify = node.appendChild(document.createElement("div"));
+		addSpotifyTrackLink(spotify, artist, title);
+
+		var links = node.appendChild(document.createElement("div"));
+		addTomahawkTrackLink(links, artist, title);
+		addRdioTrackLink(links, artist, title);
 	}
 }
 
@@ -23,9 +26,10 @@ function addTomahawkTrackLink(node, artist, title) {
 	var link = document.createElement("a");
 	//link.href = "tomahawk://open/track" + buildQueryString({ artist: artist, title: title });
 	link.href = "http://toma.hk/" + buildQueryString({ artist: artist, title: title });
-	link.innerHTML = "▶";
-	link.style.background = "url(http://www.tomahawk-player.org/sites/default/files/favicon.ico) no-repeat right center";
-	link.style.paddingRight = "20px";
+	//link.innerHTML = "▶";
+	link.style.background = "url(http://www.tomahawk-player.org/assets/ico/favicon.ico) no-repeat right center";
+	link.style.padding = "10px";
+	link.style.display = "inline-block";
 
 	link.addEventListener("click", openNewWindow, true);
 	node.appendChild(link);
@@ -70,9 +74,10 @@ function addSpotifyTrackLink(node, artist, title) {
 function addRdioTrackLink(node, artist, title) {
 	var link = document.createElement("a");
 	link.href = "http://alf.hubmed.org/2012/05/rdio-track-search/" + buildQueryString({ artist: artist, title: title });
-	link.innerHTML = "▶";
+	//link.innerHTML = "▶";
 	link.style.background = "url(http://ak.rdio.com/media/favicon_20111219.ico) no-repeat right center";
-	link.style.paddingRight = "20px";
+	link.style.padding = "10px";
+	link.style.display = "inline-block";
 
 	link.addEventListener("click", openNewWindow, true);
 	node.appendChild(link);
