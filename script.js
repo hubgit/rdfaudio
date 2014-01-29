@@ -47,7 +47,7 @@ var fetchTrack = function () {
 				object.setAttribute('type', 'text/html');
 				object.setAttribute('data', 'https://embed.spotify.com/' + buildQueryString({ uri: uri }));
 				object.style.width = '300px';
-				object.style.height = '760px';
+				object.style.height = '380px';
 				object.style.margin = '10px 0';
 
 				document.querySelector('#segments .header').appendChild(object);
