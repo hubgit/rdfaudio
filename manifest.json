@@ -6,7 +6,8 @@
   "content_scripts": [
     {
       "matches" : [
-        "http://www.bbc.co.uk/programmes/*"
+        "http://www.bbc.co.uk/programmes/*",
+        "http://playlist-o.herokuapp.com/*"
       ],
       "js" : ["script.js"]
     }
