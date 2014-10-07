@@ -103,9 +103,9 @@ xhr.open('GET', location.href + '/segments.inc');
 xhr.responseType = 'document';
 xhr.onload = function() {
 	findTracks(this.response, {
-		track: '[typeof="mo:Track"],[typeof="po:MusicSegment"],[typeof="MusicRecording"][property="track"]',
-		artist: '[rel="foaf:maker"] [property="foaf:name"],[rel="mo:performer"] [property="foaf:name"], [property="byArtist"] [property="name"]',
-		title: '[property="dc:title"], [property="name"]'
+		track: '[typeof="MusicRecording"][property="track"]',
+		artist: '[property="byArtist"] [property="name"]',
+		title: 'p[property="name"]'
 	});
 }
 xhr.send();
