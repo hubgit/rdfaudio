@@ -1,8 +1,10 @@
 var tracks = [];
 var uris = [];
 
-var findTracks = function (selector) {
-	var nodes = document.querySelectorAll(selector.track);
+var findTracks = function (node, selector) {
+	var nodes = node.querySelectorAll(selector.track);
+
+	console.log(selector, nodes.length)
 
 	for (var i = 0; i < nodes.length; i++) {
 		var node = nodes[i];
@@ -50,7 +52,8 @@ var fetchTrack = function () {
 				object.style.height = '380px';
 				object.style.margin = '10px 0';
 
-				document.querySelector('#segments .header').appendChild(object);
+				var heading = document.querySelector('h1');
+				heading.parentNode.insertBefore(object, heading.nextSibling);
 			} else {
 				fetchTrack();
 			}
@@ -95,8 +98,19 @@ var buildQueryString = function (items) {
 	return parts.length ? '?' + parts.join('&').replace(/%20/g, '+') : '';
 }
 
-findTracks({
-	track: '[typeof="mo:Track"],[typeof="po:MusicSegment"]',
-	artist: '[rel="foaf:maker"] [property="foaf:name"],[rel="mo:performer"] [property="foaf:name"]',
-	title: '[property="dc:title"]'
-});
+var xhr = new XMLHttpRequest;
+xhr.open('GET', location.href + '/segments.inc');
+xhr.responseType = 'document';
+xhr.onload = function() {
+	findTracks(this.response, {
+		track: '[typeof="mo:Track"],[typeof="po:MusicSegment"],[typeof="MusicRecording"][property="track"]',
+		artist: '[rel="foaf:maker"] [property="foaf:name"],[rel="mo:performer"] [property="foaf:name"], [property="byArtist"] [property="name"]',
+		title: '[property="dc:title"], [property="name"]'
+	});
+}
+xhr.send();
+
+
+
+
+
