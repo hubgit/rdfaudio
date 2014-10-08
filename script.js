@@ -28,39 +28,43 @@ var fetchTrack = function () {
 
 	var query = 'artist:' + track.artist + ' track:' + track.title;
 
+	var params = buildQueryString({
+		q: query,
+		type: 'track',
+		limit: 1
+	});
+
 	var xhr = new XMLHttpRequest;
-	xhr.open('GET', 'http://ws.spotify.com/search/1/track.json' + buildQueryString({ q: query }), true);
+	xhr.open('GET', 'https://api.spotify.com/v1/search' + params);
+	xhr.responseType = 'json';
 
-	xhr.onreadystatechange = function(){
-		if(xhr.readyState == 4){
-			var data = JSON.parse(xhr.responseText);
+	xhr.onload = function(){
+		var data = this.response;
 
-			if (data.tracks && data.tracks.length) {
-				var id = data.tracks[0].href.replace(/^spotify:track:/, '');
-				uris.push(id);
-			} else {
-				uris.push(null);
-			}
+		if (data.tracks && data.tracks.items && data.tracks.items.length) {
+			uris.push(data.tracks.items[0].id);
+		} else {
+			uris.push(null);
+		}
 
-			if (!tracks.length) {
-				var uri = 'spotify:trackset:bbc:' + uris.join(',');
+		if (!tracks.length) {
+			var uri = 'spotify:trackset:bbc:' + uris.join(',');
 
-				var object = document.createElement('object');
-				object.setAttribute('type', 'text/html');
-				object.setAttribute('data', 'https://embed.spotify.com/' + buildQueryString({ uri: uri }));
-				object.style.width = '300px';
-				object.style.height = '380px';
-				object.style.margin = '10px 0';
+			var object = document.createElement('object');
+			object.setAttribute('type', 'text/html');
+			object.setAttribute('data', 'https://embed.spotify.com/' + buildQueryString({ uri: uri }));
+			object.style.width = '300px';
+			object.style.height = '380px';
+			object.style.margin = '10px 0';
 
-				var heading = document.querySelector('h1');
-				heading.parentNode.insertBefore(object, heading.nextSibling);
-			} else {
-				fetchTrack();
-			}
+			var heading = document.querySelector('h1');
+			heading.parentNode.insertBefore(object, heading.nextSibling);
+		} else {
+			fetchTrack();
 		}
 	};
 
-	xhr.send(null);
+	xhr.send();
 }
 
 var tomahawkTrackLink = function (track) {
