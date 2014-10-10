@@ -53,12 +53,11 @@ var fetchTrack = function () {
 			var object = document.createElement('object');
 			object.setAttribute('type', 'text/html');
 			object.setAttribute('data', 'https://embed.spotify.com/' + buildQueryString({ uri: uri }));
-			object.style.width = '300px';
+			object.style.width = '100%';
 			object.style.height = '380px';
 			object.style.margin = '10px 0';
 
-			var heading = document.querySelector('h1');
-			heading.parentNode.insertBefore(object, heading.nextSibling);
+			document.querySelector('.map__column--last .br-box-secondary:first-of-type').appendChild(object);
 		} else {
 			fetchTrack();
 		}
