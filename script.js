@@ -4,8 +4,6 @@ var uris = [];
 var findTracks = function (node, selector) {
 	var nodes = node.querySelectorAll(selector.track);
 
-	console.log(selector, nodes.length)
-
 	for (var i = 0; i < nodes.length; i++) {
 		var node = nodes[i];
 
