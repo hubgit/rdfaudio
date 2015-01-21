@@ -100,13 +100,13 @@ var buildQueryString = function (items) {
 }
 
 var xhr = new XMLHttpRequest;
-xhr.open('GET', location.href + '/segments.inc');
+xhr.open('GET', location.pathname + '/segments.inc'); // TODO: use JSON?
 xhr.responseType = 'document';
 xhr.onload = function() {
 	findTracks(this.response, {
-		track: '[typeof="MusicRecording"][property="track"]',
+		track: '[typeof="MusicRecording"][property="hasPart"]',
 		artist: '[property="byArtist"] [property="name"]',
-		title: 'p[property="name"]'
+		title: '[property="name"]:not(.artist)'
 	});
 }
 xhr.send();
