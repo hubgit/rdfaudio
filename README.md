@@ -1,8 +1,7 @@
 # RDFaudio
 
 Google Chrome extension.
-Add a Spotify playlist to HTML track lists marked up with RDFa.
-Currently only runs on BBC Radio pages (http://www.bbc.co.uk/programmes/*).
+Add a Spotify playlist to BBC Radio programme track lists.
 
 ## Screenshot
 
