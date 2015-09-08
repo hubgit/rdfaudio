@@ -2,12 +2,11 @@
   "name": "RDFaudio",
   "version": "1.1",
   "manifest_version": 2,
-  "description": "Add audio resolver/player links to HTML track lists marked up with RDFa",
+  "description": "Convert BBC Radio track listings to Spotify playlists",
   "content_scripts": [
     {
       "matches" : [
-        "http://www.bbc.co.uk/programmes/*",
-        "http://playlist-o.herokuapp.com/*"
+        "http://www.bbc.co.uk/programmes/*"
       ],
       "js" : ["script.js"]
     }
