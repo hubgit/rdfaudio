@@ -1,5 +1,6 @@
 var tracks = [];
 var uris = [];
+var artists = [];
 
 var findTracks = function (node, selector) {
 	var nodes = node.querySelectorAll(selector.track);
@@ -8,9 +9,16 @@ var findTracks = function (node, selector) {
 		var node = nodes[i];
 
 		var track = {
-			artist: node.querySelector(selector.artist).textContent.trim(),
-			title: node.querySelector(selector.title).textContent.trim(),
+			artist: node.querySelector(selector.artist),
+			title: node.querySelector(selector.title),
 		};
+
+		if (!track.artist || !track.title) {
+			continue;
+		}
+
+		track.artist = track.artist.textContent.trim();
+		track.title = track.title.textContent.trim();
 
 		tracks.push(track);
 
@@ -40,7 +48,12 @@ var fetchTrack = function () {
 		var data = this.response;
 
 		if (data.tracks && data.tracks.items && data.tracks.items.length) {
-			uris.push(data.tracks.items[0].id);
+			var track = data.tracks.items[0];
+			uris.push(track.id);
+
+			track.artists.forEach(function(artist) {
+				artists.push(artist.id);
+			});
 		} else {
 			uris.push(null);
 		}
@@ -55,7 +68,15 @@ var fetchTrack = function () {
 			object.style.height = '380px';
 			object.style.margin = '10px 0';
 
-			document.querySelector('.map__column--last .br-box-secondary:first-of-type').appendChild(object);
+			var link = document.createElement('a');
+			link.href = 'http://git.macropus.org/musico/?ids=' + encodeURIComponent(artists.join(','));
+      link.textContent = 'Music (((O)))';
+      link.style.padding = '0 10px';
+
+			var box = document.querySelector('.map__column--last .br-box-secondary:first-of-type');
+
+			box.appendChild(link);
+			box.appendChild(object);
 		} else {
 			fetchTrack();
 		}
@@ -110,8 +131,3 @@ xhr.onload = function() {
 	});
 }
 xhr.send();
-
-
-
-
-
