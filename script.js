@@ -1,133 +1,40 @@
-var tracks = [];
-var uris = [];
-var artists = [];
-
-var findTracks = function (node, selector) {
-	var nodes = node.querySelectorAll(selector.track);
-
-	for (var i = 0; i < nodes.length; i++) {
-		var node = nodes[i];
-
-		var track = {
-			artist: node.querySelector(selector.artist),
-			title: node.querySelector(selector.title),
-		};
-
-		if (!track.artist || !track.title) {
-			continue;
-		}
-
-		track.artist = track.artist.textContent.trim();
-		track.title = track.title.textContent.trim();
-
-		tracks.push(track);
-
-		var container = node.appendChild(document.createElement('div'));
-		container.appendChild(tomahawkTrackLink(track));
-	}
-
-	fetchTrack();
+const selectors = {
+	track: '[typeof="MusicRecording"][property="hasPart"]',
+	artist: '[property="byArtist"] [property="name"]',
+	title: '[property="name"]:not(.artist)'
 }
 
-var fetchTrack = function () {
-	var track = tracks.shift();
+const extract = doc => (
+	Array.from(doc.querySelectorAll(selectors.track))
+		.map(item => ({
+			artist: item.querySelector(selectors.artist),
+			title: item.querySelector(selectors.title),
+		}))
+		.filter(item => item.artist && item.title)
+		.map(item => ({
+			artist: item.artist.textContent.trim(),
+			title: item.title.textContent.trim()
+		}))
+)
 
-	var query = 'artist:' + track.artist + ' track:' + track.title;
+const display = playlist => {
+	const player = document.createElement('object')
+	player.setAttribute('type', 'text/html')
+	player.setAttribute('data', 'https://embed.spotify.com/?uri=' + encodeURIComponent(playlist.uri))
+	player.style.width = '100%'
+	player.style.height = '380px'
+	player.style.margin = '10px 0'
 
-	var params = buildQueryString({
-		q: query,
-		type: 'track',
-		limit: 1
-	});
-
-	var xhr = new XMLHttpRequest;
-	xhr.open('GET', 'https://api.spotify.com/v1/search' + params);
-	xhr.responseType = 'json';
-
-	xhr.onload = function(){
-		var data = this.response;
-
-		if (data.tracks && data.tracks.items && data.tracks.items.length) {
-			var track = data.tracks.items[0];
-			uris.push(track.id);
-
-			track.artists.forEach(function(artist) {
-				artists.push(artist.id);
-			});
-		} else {
-			uris.push(null);
-		}
-
-		if (!tracks.length) {
-			var uri = 'spotify:trackset:bbc:' + uris.join(',');
-
-			var object = document.createElement('object');
-			object.setAttribute('type', 'text/html');
-			object.setAttribute('data', 'https://embed.spotify.com/' + buildQueryString({ uri: uri }));
-			object.style.width = '100%';
-			object.style.height = '380px';
-			object.style.margin = '10px 0';
-
-			var link = document.createElement('a');
-			link.href = 'http://git.macropus.org/musico/?ids=' + encodeURIComponent(artists.join(','));
-      link.textContent = 'Music (((O)))';
-      link.style.padding = '0 10px';
-
-			var box = document.querySelector('.map__column--last .br-box-secondary:first-of-type');
-
-			box.appendChild(link);
-			box.appendChild(object);
-		} else {
-			fetchTrack();
-		}
-	};
-
-	xhr.send();
+	document.querySelector('.map__column--last .br-box-secondary:first-of-type').appendChild(player)
 }
 
-var tomahawkTrackLink = function (track) {
-	var link = document.createElement('a');
-	link.href = 'tomahawk://open/track' + buildQueryString(track);
-	link.style.background = 'url(http://www.tomahawk-player.org/assets/ico/favicon.ico) no-repeat right center';
-	link.style.padding = '10px';
-	link.style.display = 'inline-block';
+const parser = new DOMParser();
 
-	return link;
-}
+(async () => {
+	const response = await fetch(location.pathname + '/segments.inc')
+	const html = await response.text()
+	const doc = parser.parseFromString(html, 'text/html')
+	const items = extract(doc)
 
-var buildQueryString = function (items) {
-	var parts = [];
-
-	var add = function(key, value) {
-		parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
-	}
-
-	for (var key in items) {
-		if (!items.hasOwnProperty(key)) continue;
-
-   		var obj = items[key];
-
-   		if (Array.isArray(obj)) {
-   			obj.forEach(function(value) {
-   				add(key, value);
-   			});
-   		}
-   		else {
-   			add(key, obj);
-   		}
-	}
-
-	return parts.length ? '?' + parts.join('&').replace(/%20/g, '+') : '';
-}
-
-var xhr = new XMLHttpRequest;
-xhr.open('GET', location.pathname + '/segments.inc'); // TODO: use JSON?
-xhr.responseType = 'document';
-xhr.onload = function() {
-	findTracks(this.response, {
-		track: '[typeof="MusicRecording"][property="hasPart"]',
-		artist: '[property="byArtist"] [property="name"]',
-		title: '[property="name"]:not(.artist)'
-	});
-}
-xhr.send();
+	chrome.runtime.sendMessage(items, display)
+})()
