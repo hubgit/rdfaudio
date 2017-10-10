@@ -5,7 +5,7 @@
   "description": "Convert BBC Radio track listings to Spotify playlists",
   "permissions": ["identity", "storage"],
   "background": {
-    "scripts": ["spotify.js"],
+    "scripts": ["event.js"],
     "persistent": false
   },
   "content_scripts": [
@@ -13,7 +13,7 @@
       "matches" : [
         "http://www.bbc.co.uk/programmes/*"
       ],
-      "js" : ["script.js"]
+      "js" : ["content.js"]
     }
   ]
 }

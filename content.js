@@ -28,13 +28,14 @@ const display = playlist => {
 	document.querySelector('.map__column--last .br-box-secondary:first-of-type').appendChild(player)
 }
 
-const parser = new DOMParser();
+const parser = new DOMParser()
 
-(async () => {
+;(async () => {
 	const response = await fetch(location.pathname + '/segments.inc')
 	const html = await response.text()
 	const doc = parser.parseFromString(html, 'text/html')
-	const items = extract(doc)
+	const tracks = extract(doc)
+	const title = document.title
 
-	chrome.runtime.sendMessage(items, display)
+	chrome.runtime.sendMessage({ tracks, title }, display)
 })()

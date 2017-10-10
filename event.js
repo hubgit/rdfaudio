@@ -1,4 +1,5 @@
-const SPOTIFY_CLIENT_ID = 'ba01a18f2a0c4e9fa3130fa8a140ef48'
+const client_id = 'ba01a18f2a0c4e9fa3130fa8a140ef48'
+const redirect_uri = chrome.identity.getRedirectURL('oauth2')
 
 const buildQueryString = params => Object.keys(params)
     .map(key => [key, params[key]].map(encodeURIComponent).join('='))
@@ -10,19 +11,13 @@ const randomState = () => {
     return String(array[0])
 }
 
-const getToken = () => new Promise((resolve, reject) => {
-    chrome.storage.local.get('accessToken', result => {
-        resolve(result.accessToken || authorize())
-    })
-})
-
 const authorize = () => new Promise((resolve, reject) => {
     const state = randomState()
 
     chrome.identity.launchWebAuthFlow({
         url: 'https://accounts.spotify.com/authorize?' + buildQueryString({
-            client_id: SPOTIFY_CLIENT_ID,
-            redirect_uri: chrome.identity.getRedirectURL('oauth2'),
+            client_id,
+            redirect_uri,
             response_type: 'token',
             scope: 'playlist-modify-private',
             state
@@ -45,6 +40,12 @@ const authorize = () => new Promise((resolve, reject) => {
     })
 })
 
+const getToken = () => new Promise((resolve, reject) => {
+    chrome.storage.local.get('accessToken', result => {
+        resolve(result.accessToken || authorize())
+    })
+})
+
 const api = async (url, options = {}) => {
     const accessToken = await getToken()
 
@@ -60,8 +61,21 @@ const api = async (url, options = {}) => {
     if (data.error) {
         console.error(data.error)
 
-        if (data.error.status === 400) {
-            authorize() // TODO: retry
+        switch (data.error.status) {
+            // case 400:
+            //     return new Promise((resolve, reject) => {
+            //         window.setTimeout(() => {
+            //             resolve(api(url, options))
+            //         }, 10000) // retry in 10000 seconds (TODO: use rate-limiting headers)
+            //     })
+
+            case 401: {
+                return new Promise((resolve, reject) => {
+                    chrome.storage.local.remove('accessToken', () => {
+                        resolve(api(url, options)) // retry
+                    })
+                })
+            }
         }
 
         return
@@ -70,7 +84,7 @@ const api = async (url, options = {}) => {
     return data
 }
 
-const createPlaylist = async (tracks, sendResponse) => {
+const createPlaylist = async ({ title, tracks }, sendResponse) => {
     const user = await api('/me')
 
     const playlist = await api(`/users/${user.id}/playlists`, {
@@ -79,7 +93,7 @@ const createPlaylist = async (tracks, sendResponse) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            name: 'BBC Radio',
+            name: title,
             public: false,
 
         })
