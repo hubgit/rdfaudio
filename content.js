@@ -1,5 +1,5 @@
 const selectors = {
-	track: '[typeof="MusicRecording"][property="hasPart"]',
+	track: '[property="hasPart"][typeof="MusicRecording"]',
 	artist: '[property="byArtist"] [property="name"]',
 	title: '[property="name"]:not(.artist)'
 }
@@ -12,8 +12,8 @@ const extract = doc => (
 		}))
 		.filter(item => item.artist && item.title)
 		.map(item => ({
-			artist: item.artist.textContent.trim(),
-			title: item.title.textContent.trim()
+			artist: item.artist.textContent.trim().replace(/[^\s\w]+/g, ' '),
+			title: item.title.textContent.replace(/[^\s\w]+/g, ' ').trim()
 		}))
 )
 
