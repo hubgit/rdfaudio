@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches" : [
-        "http://www.bbc.co.uk/programmes/*"
+        "https://www.bbc.co.uk/programmes/*"
       ],
       "js" : ["content.js"]
     }
