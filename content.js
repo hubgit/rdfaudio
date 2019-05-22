@@ -6,15 +6,15 @@ const selectors = {
 
 const extract = doc => (
 	Array.from(doc.querySelectorAll(selectors.track))
-		.map(item => ({
-			artist: item.querySelector(selectors.artist),
-			title: item.querySelector(selectors.title),
-		}))
-		.filter(item => item.artist && item.title)
-		.map(item => ({
-			artist: item.artist.textContent.trim().replace(/[^\s\w]+/g, ' '),
-			title: item.title.textContent.replace(/[^\s\w]+/g, ' ').trim()
-		}))
+	.map(item => ({
+		artist: item.querySelector(selectors.artist),
+		title: item.querySelector(selectors.title),
+	}))
+	.filter(item => item.artist && item.title)
+	.map(item => ({
+		artist: item.artist.textContent.trim().replace(/[^\s\w]+/g, ' '),
+		title: item.title.textContent.replace(/[^\s\w]+/g, ' ').trim()
+	}))
 )
 
 const display = playlist => {
@@ -30,12 +30,19 @@ const display = playlist => {
 
 const parser = new DOMParser()
 
-;(async () => {
+const run = async () => {
 	const response = await fetch(location.pathname + '/segments.inc')
 	const html = await response.text()
 	const doc = parser.parseFromString(html, 'text/html')
 	const tracks = extract(doc)
 	const title = document.title
 
-	chrome.runtime.sendMessage({ tracks, title }, display)
-})()
+	chrome.runtime.sendMessage({
+		tracks,
+		title
+	}, display)
+}
+
+run().catch(error => {
+	console.error(error)
+})

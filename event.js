@@ -1,6 +1,10 @@
 const client_id = 'ba01a18f2a0c4e9fa3130fa8a140ef48'
 const redirect_uri = chrome.identity.getRedirectURL('oauth2')
 
+console.log({
+    redirect_uri
+})
+
 const buildQueryString = params => Object.keys(params)
     .map(key => [key, params[key]].map(encodeURIComponent).join('='))
     .join('&').replace(/%20/g, '+')
@@ -12,31 +16,41 @@ const randomState = () => {
 }
 
 const authorize = () => new Promise((resolve, reject) => {
-    const state = randomState()
+    const params = {
+        client_id,
+        redirect_uri,
+        response_type: 'token',
+        scope: 'playlist-modify-private',
+        state: randomState()
+    }
+
+    const url = 'https://accounts.spotify.com/authorize?' + buildQueryString(params)
+
+    console.log(url)
 
     chrome.identity.launchWebAuthFlow({
-        url: 'https://accounts.spotify.com/authorize?' + buildQueryString({
-            client_id,
-            redirect_uri,
-            response_type: 'token',
-            scope: 'playlist-modify-private',
-            state
-        }),
+        url,
         interactive: true,
-     }, redirectURL => {
-        const params = new URLSearchParams(redirectURL.split('#')[1])
+    }, redirectURL => {
+        if (redirectURL) {
+            const response = new URLSearchParams(redirectURL.split('#')[1])
 
-        if (params.get('state') !== state) {
-            throw new Error('Invalid state')
+            if (response.get('state') !== params.state) {
+                throw new Error('Invalid state')
+            }
+
+            const accessToken = response.get('access_token')
+
+            chrome.storage.local.set({
+                accessToken
+            }, () => {
+                resolve(accessToken)
+            })
+
+            // TODO: prevent infinite loops, catch rate limiting
+        } else {
+            console.error(chrome.runtime.lastError.message)
         }
-
-        const accessToken = params.get('access_token')
-
-        chrome.storage.local.set({ accessToken }, () => {
-            resolve(accessToken)
-        })
-
-        // TODO: prevent infinite loops, catch rate limiting
     })
 })
 
@@ -84,7 +98,10 @@ const api = async (url, options = {}) => {
     return data
 }
 
-const createPlaylist = async ({ title, tracks }, sendResponse) => {
+const createPlaylist = async ({
+    title,
+    tracks
+}, sendResponse) => {
     const user = await api('/me')
 
     const playlist = await api(`/users/${user.id}/playlists`, {
@@ -100,14 +117,16 @@ const createPlaylist = async ({ title, tracks }, sendResponse) => {
     })
 
     const uris = await Promise.all(tracks.map(async item => {
+        const q = 'artist:' + item.artist + ' track:' + item.title
+
         const search = await api('/search?' + buildQueryString({
-            q: 'artist:' + item.artist + ' track:' + item.title,
+            q,
             type: 'track',
             limit: 1
         }))
 
         if (!search.tracks || !Array.isArray(search.tracks.items) || !search.tracks.items.length) {
-            console.error('No tracks')
+            console.info(`No tracks for ${q}`)
             return null
         }
 
